@@ -212,4 +212,4 @@ runcmd:
 7) Run stress.sh on node in instance pool. This will kick autoscaling which in turn will invoke addsharednode.sh script as part of cloud-init and node will added into the configuration. 
 
 ## Disclaimer
-The scripts are provided are for educational purpose only without any support.
+The scripts are provided for educational purpose only without any support.
