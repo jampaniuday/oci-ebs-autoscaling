@@ -1,0 +1,22 @@
+### DEFAULT VARIABLES
+
+# Scripts directory under apps_base
+script_base: "{{ apps_base }}/scripts"
+
+# oci-hostname.conf file path
+oci_hostname_conf: /etc/oci-hostname.conf
+
+# Oracle E-Business Suite env file patch
+apps_env: "{{ apps_base }}/EBSapps.env"
+
+# Copy of /etc/hosts file
+hosts_orig: "{{ script_base }}/hosts.orig"
+
+# Oracle E-Business Suite primary node custom application pairs file path
+apps_pairs: "{{ script_base }}/appspairs.txt"
+
+# Oracle E-Business Suite secondary node application pairs file path
+addnode_pairs: "{{ script_base }}/addnodepairs_{{ ansible_hostname }}.txt"
+
+# Shell script to create E-Business Suite secondary node application pairs file
+gen_pairs_script: "{{ script_base }}/genpairs.sh"

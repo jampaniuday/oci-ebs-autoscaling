@@ -1,0 +1,22 @@
+---
+
+# Run pre add node tasks on new application node
+
+- name: Configure new application node
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+
+  - name: Update /etc/hosts
+    become: yes
+    become_method: sudo
+    become_user: root
+    shell: "sh -x {{ script_base }}/ansible/files/hosts.sh {{ script_base }} {{ logical_domain }}"
+    register: update_etc_hosts
+
+  - name: Update oci-hostname.conf 
+    lineinfile:
+      path: "{{ oci_hostname_conf }}"
+      regexp: '^PRESERVE_HOSTINFO='
+      line: 'PRESERVE_HOSTINFO=2'
+    register: update_oci_hostname

@@ -1,0 +1,37 @@
+---
+
+# Run post node addition tasks
+
+- name: Run post tasks on master node
+  hosts: appmaster  
+  tasks:
+
+  - name: Check AdminServer status on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh status
+    register: check_post_adm_patch_status
+
+  - name: Stop AdminServer on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh stop
+    register: start_adm_patch
+    when: "'The AdminServer is running' in check_post_adm_patch_status.stdout"
+
+  - name: Check Nodemgr status on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; } | sh $INST_TOP/admin/scripts/adnodemgrctl.sh status
+    register: check_post_nm_patch_status
+
+  - name: Stop Nodemgr on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; } | sh $INST_TOP/admin/scripts/adnodemgrctl.sh stop
+    register: start_adm_patch
+    when: "'The Node Manager is running' in check_post_nm_patch_status.stdout"

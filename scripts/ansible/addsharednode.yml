@@ -1,0 +1,21 @@
+---
+
+# Add Oracle E-Business Suite Application Node
+
+#- name: Preclone master 
+#  import_playbook: pre_clone_master.yml
+
+- name: Update /etc/hosts on new application node 
+  import_playbook: pre_addnode_local.yml
+
+- name: Update /etc/hosts on existing application nodes
+  import_playbook: pre_addnode_global.yml
+
+- name: Run prechecks on master node
+  import_playbook: pre_addnode_master.yml
+
+- name: Add node
+  import_playbook: addnode.yml
+
+- name: Run post addnode steps
+  import_playbook: post_addnode_master.yml

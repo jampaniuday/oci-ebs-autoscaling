@@ -1,0 +1,25 @@
+### USER DEFINED VARIABLES
+
+# Oracle E-Business Suite application user
+apps_user: apps
+
+# Oracle E-Business Suite application password
+apps_pass: <password for apps user>
+
+# Oracle E-Business Suite weblogic password
+weblogic_pass: <password for weblogic user>
+
+# Oracle E-Business Suite application base install directory. For example - /u01/install/APPS
+apps_base: /u01/install/APPS
+
+# Oracle E-Business Suite application binaries owner
+oracle_user: oracle
+
+# Oracle E-Business Suite database PDB name
+database_pdb_name: EBSDB
+
+# Oracle E-Business Suite master hostname.Hostname of first node where weblogic admin server is running
+master_hostname: <hostname of master node>
+
+# Oracle E-Business Suite application logical domain.For example - example.com
+logical_domain: oci.com

@@ -1,0 +1,4 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.16.8.4 ebsappash11.oci.com	ebsappash11	ebsappash11.appsubad1.ebsautovcn.oraclevcn.com ebsappash11
+172.16.8.8   ebsappash.oci.com    ebsappash    ebsappash.appsubad1.ebsautovcn.oraclevcn.com      ebsappash

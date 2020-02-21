@@ -1,0 +1,74 @@
+---
+
+# Add Oracle E-Business Suite Application Node
+
+- name: Validate input variables
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+
+  - name: Check if master apps pairs file exist
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    stat:
+      path: "{{ apps_pairs }}"
+    register: check_apps_pair_file
+    failed_when:
+      - "not check_apps_pair_file.stat.exists"
+
+  - name: Delete secondary node apps pairs file if it exists
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    file:
+      path: "{{ addnode_pairs }}"
+      state: absent
+
+  - name: Generate secondary node apps pairs file
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    shell: "sh -x {{ gen_pairs_script }} {{ master_hostname }} {{ script_base }}"
+    register: gen_pairs_file
+
+  - name: Check generated secondary node pairs file exist
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    stat:
+      path: "{{ addnode_pairs }}"
+    register: check_addnode_pairs
+    failed_when:
+      - "not check_addnode_pairs.stat.exists"
+
+  - name: Add secondary node
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    shell: "cd {{ apps_base }}/fs1/EBSapps/comn/clone/bin;  export PATH={{ apps_base }}/fs1/FMW_Home/webtier/perl/bin:$PATH; { echo {{ apps_pass }}; echo {{ weblogic_pass }}; } | {{ apps_base }}/fs1/FMW_Home/webtier/perl/bin/perl ./adclonectx.pl addnode contextfile={{ apps_base }}/fs1/inst/apps/{{ database_pdb_name }}_{{ master_hostname }}/appl/admin/{{ database_pdb_name }}_{{ master_hostname }}.xml pairsfile={{ apps_base }}/scripts/addnodepairs_{{ ansible_hostname }}.txt dualfs=yes"
+    register: addnode
+    failed_when: addnode.rc != 0
+
+  - name: Start Services
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} run; { echo {{ apps_user }}; echo {{ apps_pass }}; echo {{ weblogic_pass }}; } | sh $INST_TOP/admin/scripts/adstrtal.sh -nopromptmsg
+    register: start_svcs
+    when: addnode.rc == 0
+
+  - name: Check Nodemgr status on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; } | sh $INST_TOP/admin/scripts/adnodemgrctl.sh status
+    register: check_nm_patch_status
+
+  - name: Stop Nodemgr on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; } | sh $INST_TOP/admin/scripts/adnodemgrctl.sh stop
+    register: start_adm_patch
+    when: "'The Node Manager is running' in check_nm_patch_status.stdout"

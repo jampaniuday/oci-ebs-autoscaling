@@ -1,0 +1,13 @@
+[appmaster]
+appmaster1 ansible_host=<IP Address of EBS primary node>
+
+[appmaster:vars]
+ansible_user=opc
+ansible_ssh_private_key_file = <SSH private key path>
+
+[appslave]
+appslave1 ansible_host=<IP Address of EBS secondary node>
+
+[appslave:vars]
+ansible_user=opc
+ansible_ssh_private_key_file = <SSH private key path>

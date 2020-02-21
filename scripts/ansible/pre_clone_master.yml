@@ -1,0 +1,65 @@
+---
+
+# Run preclone on master node
+
+- name: Validate input variables
+  hosts: appmaster
+  
+  tasks:
+  - name: Check apps environment file
+    become: yes
+    become_method: sudo
+    become_user: "{{ oracle_user }}"
+    stat:
+      path: "{{ apps_env }}"
+    register: check_apps_env
+    failed_when:
+      - "not check_apps_env.stat.exists"
+
+  - name: Check AdminServer status on RUN filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} run; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh status
+    register: check_adm_run
+
+  - name: Start AdminServer on RUN filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} run; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh start
+    failed_when: start_adm_run.rc != 0
+    register: start_adm_run
+    when: "'The AdminServer is not running' in check_adm_run.stdout"
+
+  - name: Run preclone on RUN filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} run; { echo {{ apps_pass }}; echo {{ weblogic_pass }}; } | perl $INST_TOP/admin/scripts/adpreclone.pl appsTier
+    register: preclone_run_fs
+    when: start_adm_run.rc == 0
+  
+  - name: Check AdminServer status on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh status
+    register: check_adm_patch
+  
+  - name: Start AdminServer on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ weblogic_pass }}; echo {{ apps_pass }}; } | sh $INST_TOP/admin/scripts/adadminsrvctl.sh start forcepatchfs
+    failed_when: start_adm_patch.rc != 0
+    register: start_adm_patch
+    when: "'The AdminServer is not running' in check_adm_patch.stdout"
+
+  - name: Run preclone on PATCH filesystem
+    become: yes
+    become_method: sudo  
+    become_user: "{{ oracle_user }}"
+    shell: source {{ apps_env }} patch; { echo {{ apps_pass }}; echo {{ weblogic_pass }}; } | perl $INST_TOP/admin/scripts/adpreclone.pl appsTier
+    register: preclone_patch_fs
+    when: start_adm_patch.rc == 0

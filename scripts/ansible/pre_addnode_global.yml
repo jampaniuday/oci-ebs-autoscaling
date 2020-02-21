@@ -1,0 +1,19 @@
+---
+
+# Run pre add node tasks on existing application nodes
+
+- name: Configure existing application nodes
+  hosts: all
+  tasks:
+  - name: Update /etc/hosts
+    become: yes
+    become_method: sudo
+    become_user: root
+    copy:
+      src: "{{ hosts_orig }}"
+      dest: "/etc/hosts"
+      owner: root
+      group: root
+      mode: 0644
+      backup: yes
+    register: update_etc_hosts_all
